@@ -12,7 +12,7 @@ namespace TotalMinerPictureInjector
     {
         public static byte[] ToColorDataAll(Bitmap pic, out int sroot)
         {
-            var Carry = ToColorData(pic, out sroot);
+            var Carry = ToColorData(pic, out sroot, pic.Height * pic.Width);
 
             return ToColorData(Carry, sroot);
         }
@@ -34,7 +34,7 @@ namespace TotalMinerPictureInjector
         public static Color[] ToColorData(Bitmap pic, out int sroot, int array_size = 4096)
         {
             var Carry = new Color[array_size];
-            sroot = (int)Math.Sqrt(Carry.Length);
+            sroot = (int)Math.Sqrt(array_size);
             for (int x = 0; x < sroot; x++)
             {
                 for (int y = 0; y < sroot; y++)

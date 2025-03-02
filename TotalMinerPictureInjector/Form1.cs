@@ -55,6 +55,7 @@ namespace TotalMinerPictureInjector
                 if (dialog == DialogResult.OK)
                 {
                     pics[index].Replace(ref pics[index].src, file.FileName);
+                    pics[index].Replace(ref pics[index].Lod_src, file.FileName);
                     pictureBox1.Image = pics[index].src.Item1;
                 }
             }
@@ -113,11 +114,21 @@ namespace TotalMinerPictureInjector
         {
             var index = listBox1.SelectedIndex;
 
-            pictureBox1.Image = pics[index].src.Item1;
+            if(checkBox1.Checked)
+            {
+                pictureBox1.Image = pics[index].Lod_src.Item1;
+            }
+            else
+            {
+                pictureBox1.Image = pics[index].src.Item1;
+            }
         }
 
         private void Save_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(Selected_File))
+                return;
+
             using (BinaryWriter binaryWriter = new BinaryWriter(File.Open(Selected_File, FileMode.Open)))
             {
                 foreach (var item in pics.FindAll(x => x.replaced))
@@ -125,12 +136,26 @@ namespace TotalMinerPictureInjector
                     binaryWriter.BaseStream.Position = item.src.Item2;
                     binaryWriter.Write(Helper.ToColorDataAll(item.src.Item1, out int sroot1));
 
-                    //binaryWriter.BaseStream.Position = item.Lod_src.Item2;
-                    //binaryWriter.Write(Helper.ToColorDataAll(item.Lod_src.Item1, out int sroot2));
+                    binaryWriter.BaseStream.Position = item.Lod_src.Item2;
+                    binaryWriter.Write(Helper.ToColorDataAll(item.Lod_src.Item1, out int sroot2));
                 }
             }
 
             clear_Click(this, EventArgs.Empty);
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            var index = listBox1.SelectedIndex;
+
+            if (checkBox1.Checked)
+            {
+                pictureBox1.Image = pics[index].Lod_src.Item1;
+            }
+            else
+            {
+                pictureBox1.Image = pics[index].src.Item1;
+            }
         }
     }
 }
