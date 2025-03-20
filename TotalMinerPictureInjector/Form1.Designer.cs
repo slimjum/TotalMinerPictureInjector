@@ -29,6 +29,7 @@ namespace TotalMinerPictureInjector
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.button1 = new System.Windows.Forms.Button();
@@ -141,9 +142,10 @@ namespace TotalMinerPictureInjector
             this.Controls.Add(this.button1);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.listBox1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.Text = "TM Picture Injector";
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
