@@ -37,7 +37,7 @@ namespace TotalMinerPictureInjector
                 var dialog = file.ShowDialog();
 
                 if (dialog == DialogResult.OK)
-                    pics[index].Extract(pics[index].src, file.FileName);
+                    pics[index].Extract(pics[index].Hd, file.FileName);
             }
         }
 
@@ -55,9 +55,9 @@ namespace TotalMinerPictureInjector
 
                 if (dialog == DialogResult.OK)
                 {
-                    pics[index].Replace(ref pics[index].src, file.FileName);
-                    pics[index].Replace(ref pics[index].Lod_src, file.FileName);
-                    pictureBox1.Image = pics[index].src.Item1;
+                    pics[index].Replace(ref pics[index].Hd, file.FileName);
+                    pics[index].Replace(ref pics[index].Lod, file.FileName);
+                    pictureBox1.Image = pics[index].Hd.Item1;
                 }
             }
         }
@@ -125,11 +125,11 @@ namespace TotalMinerPictureInjector
 
             if(checkBox1.Checked)
             {
-                pictureBox1.Image = pics[index].Lod_src.Item1;
+                pictureBox1.Image = pics[index].Lod.Item1;
             }
             else
             {
-                pictureBox1.Image = pics[index].src.Item1;
+                pictureBox1.Image = pics[index].Hd.Item1;
             }
         }
 
@@ -140,13 +140,13 @@ namespace TotalMinerPictureInjector
 
             using (BinaryWriter binaryWriter = new BinaryWriter(File.Open(Selected_File, FileMode.Open)))
             {
-                foreach (var item in pics.FindAll(x => x.replaced))
+                foreach (var item in pics.FindAll(x => x.Edited || x.Hd.Item1.Width != 64 || x.Lod.Item1.Width != 16))
                 {
-                    binaryWriter.BaseStream.Position = item.src.Item2;
-                    binaryWriter.Write(Helper.ToColorDataAll(item.src.Item1, out int sroot1));
+                    binaryWriter.BaseStream.Position = item.Hd.Item2;
+                    binaryWriter.Write(Helper.ToColorDataAll(new Bitmap(item.Hd.Item1, new Size(64, 64)), out int sroot1));
 
-                    binaryWriter.BaseStream.Position = item.Lod_src.Item2;
-                    binaryWriter.Write(Helper.ToColorDataAll(item.Lod_src.Item1, out int sroot2));
+                    binaryWriter.BaseStream.Position = item.Lod.Item2;
+                    binaryWriter.Write(Helper.ToColorDataAll(new Bitmap(item.Lod.Item1, new Size(16, 16)), out int sroot2));
                 }
             }
 
@@ -165,15 +165,20 @@ namespace TotalMinerPictureInjector
 
             if (checkBox1.Checked)
             {
-                pictureBox1.Image = pics[index].Lod_src.Item1;
+                pictureBox1.Image = pics[index].Lod.Item1;
             }
             else
             {
-                pictureBox1.Image = pics[index].src.Item1;
+                pictureBox1.Image = pics[index].Hd.Item1;
             }
         }
 
         private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Add_picture_button_Click(object sender, EventArgs e)
         {
 
         }

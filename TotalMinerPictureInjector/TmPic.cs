@@ -11,20 +11,20 @@ namespace TotalMinerPictureInjector
 {
     public class TmPic
     {
-        public Tuple<Bitmap, long> Lod_src;
+        public Tuple<Bitmap, long> Lod;
 
-        public Tuple<Bitmap, long> src;
+        public Tuple<Bitmap, long> Hd;
 
         public int index { private set; get; } = 0;
 
-        public bool replaced { private set; get; } = false;
+        public bool Edited { private set; get; } = false;
 
         public TmPic(BinaryReader reader)
         {
             index = reader.ReadInt32();
 
-            src = Load(reader);
-            Lod_src = Load(reader);
+            Hd = Load(reader);
+            Lod = Load(reader);
         }
 
         private Tuple<Bitmap, long> Load(BinaryReader reader)
@@ -48,7 +48,7 @@ namespace TotalMinerPictureInjector
            var temp_index = data.Item2;
 
             data = new Tuple<Bitmap, long>(pic, temp_index);
-            replaced = true;
+            Edited = true;
         }
 
         public void Extract(Tuple<Bitmap, long> data, string path)
