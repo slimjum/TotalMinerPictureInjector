@@ -48,7 +48,6 @@ namespace TotalMinerPictureInjector
 
             var index = listBox1.SelectedIndex;
 
-
             using (FileDialog file = new OpenFileDialog() { Filter = "img file|*.png",})
             {
                 var dialog = file.ShowDialog();
@@ -57,7 +56,7 @@ namespace TotalMinerPictureInjector
                 {
                     pics[index].Replace(ref pics[index].Hd, file.FileName);
                     pics[index].Replace(ref pics[index].Lod, file.FileName);
-                    pictureBox1.Image = pics[index].Hd.Item1;
+                    pictureBox1.Image = pics[index].Hd;
                 }
             }
         }
@@ -103,7 +102,7 @@ namespace TotalMinerPictureInjector
 
                 for (int i = 0; i < count; i++)
                 {
-                    listBox1.Items.Add($"Index: {i}");
+                    listBox1.Items.Add($"Index: {i + 1}");
                     pics.Add(new TmPic(reader));
                 }
             }
@@ -123,30 +122,29 @@ namespace TotalMinerPictureInjector
         {
             var index = listBox1.SelectedIndex;
 
-            if(checkBox1.Checked)
-            {
-                pictureBox1.Image = pics[index].Lod.Item1;
+            if (index == -1)
+                return;
+
+            pictureBox1.Image = checkBox1.Checked ? pics[index].Lod : pics[index].Hd;
             }
-            else
-            {
-                pictureBox1.Image = pics[index].Hd.Item1;
-            }
-        }
 
         private void Save_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(Selected_File))
                 return;
 
-            using (BinaryWriter binaryWriter = new BinaryWriter(File.Open(Selected_File, FileMode.Open)))
+            using (BinaryWriter Writer = new BinaryWriter(File.Open(Selected_File, FileMode.Open)))
             {
-                foreach (var item in pics.FindAll(x => x.Edited || x.Hd.Item1.Width != 64 || x.Lod.Item1.Width != 16))
+                Writer.Write(pics.Count);
+                for (int index = 0; index < pics.Count; index++)
                 {
-                    binaryWriter.BaseStream.Position = item.Hd.Item2;
-                    binaryWriter.Write(Helper.ToColorDataAll(new Bitmap(item.Hd.Item1, new Size(64, 64)), out int sroot1));
+                    Writer.Write(pics[index].index);
 
-                    binaryWriter.BaseStream.Position = item.Lod.Item2;
-                    binaryWriter.Write(Helper.ToColorDataAll(new Bitmap(item.Lod.Item1, new Size(16, 16)), out int sroot2));
+                    Writer.Write(64 * 64);
+                    Writer.Write(Helper.ToColorDataAll(new Bitmap(pics[index].Hd, new Size(64, 64)), out int sroot1));
+
+                    Writer.Write(16 * 16);
+                    Writer.Write(Helper.ToColorDataAll(new Bitmap(pics[index].Lod, new Size(16, 16)), out int sroot2));
                 }
             }
 
@@ -163,7 +161,10 @@ namespace TotalMinerPictureInjector
                 return;
             }
 
-            if (checkBox1.Checked)
+            pictureBox1.Image = checkBox1.Checked ? pics[index].Lod : pics[index].Hd;
+        }
+
+        private void Add_picture_button_Click(object sender, EventArgs e)
             {
                 pictureBox1.Image = pics[index].Lod.Item1;
             }

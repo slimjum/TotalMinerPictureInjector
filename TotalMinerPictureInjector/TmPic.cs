@@ -11,13 +11,9 @@ namespace TotalMinerPictureInjector
 {
     public class TmPic
     {
-        public Tuple<Bitmap, long> Lod;
-
-        public Tuple<Bitmap, long> Hd;
+        public Bitmap Lod, Hd;
 
         public int index { private set; get; } = 0;
-
-        public bool Edited { private set; get; } = false;
 
         public TmPic(BinaryReader reader)
         {
@@ -27,7 +23,15 @@ namespace TotalMinerPictureInjector
             Lod = Load(reader);
         }
 
-        private Tuple<Bitmap, long> Load(BinaryReader reader)
+        public TmPic(int index)
+        {
+            this.index = index;
+            var placeholder = Bitmap.FromFile(@"PlaceholderImage.png");
+            Hd = new Bitmap(placeholder, new Size(64, 64));
+            Lod = new Bitmap(placeholder, new Size(16, 16));
+        }
+
+        private Bitmap Load(BinaryReader reader)
         {
             int ColorCount = reader.ReadInt32();
 
@@ -39,21 +43,17 @@ namespace TotalMinerPictureInjector
             var colorData = array.ToColorData();
             var size = (int)Math.Sqrt(colorData.Length);
 
-            return new Tuple<Bitmap, long>(Helper.FromTMData(size, size, colorData), pos);
+            return Helper.FromTMData(size, size, colorData);
         }
         
-        public void Replace(ref Tuple<Bitmap, long> data, string path)
+        public void Replace(ref Bitmap bitmap, string path)
         {
-           var pic = new Bitmap(Bitmap.FromFile(path), data.Item1.Size);
-           var temp_index = data.Item2;
-
-            data = new Tuple<Bitmap, long>(pic, temp_index);
-            Edited = true;
+            bitmap = new Bitmap(Bitmap.FromFile(path), bitmap.Size);
         }
 
-        public void Extract(Tuple<Bitmap, long> data, string path)
+        public void Extract(Bitmap bitmap, string path)
         {
-            data.Item1.Save(path, ImageFormat.Png);
+            bitmap.Save(path, ImageFormat.Png);
         }
     }
 }
