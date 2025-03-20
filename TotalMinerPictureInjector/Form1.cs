@@ -73,7 +73,7 @@ namespace TotalMinerPictureInjector
 
 
             string mygames = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), @"My Games\TotalMiner\Maps\");
-            using (FileDialog file =  new OpenFileDialog(){ Filter = "Tm Pic File|*.dat", InitialDirectory = mygames, Title = "pick photos.dat" })
+            using (FileDialog file =  new OpenFileDialog(){ FileName = "photos.dat", Filter = "TM Photo File|*.dat", InitialDirectory = mygames, Title = "Select photos.dat" })
             {
                 var dialog = file.ShowDialog();
 
