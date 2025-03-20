@@ -22,6 +22,7 @@ namespace TotalMinerPictureInjector
             InitializeComponent();
 
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
+            checkBox1.Enabled = false;
         }
 
         private void Extract_Click(object sender, EventArgs e)
@@ -100,6 +101,7 @@ namespace TotalMinerPictureInjector
                     pics.Add(new TmPic(reader));
                 }
             }
+            checkBox1.Enabled = listBox1.Items.Count > 0;
         }
 
         private void clear_Click(object sender, EventArgs e)
@@ -108,6 +110,7 @@ namespace TotalMinerPictureInjector
             listBox1.Items.Clear();
             pictureBox1.Image = null;
             Selected_File = "";
+            checkBox1.Enabled = false;
         }
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -148,6 +151,12 @@ namespace TotalMinerPictureInjector
         {
             var index = listBox1.SelectedIndex;
 
+            if (index == -1)
+            {
+                MessageBox.Show("Please select a photo first.");
+                return;
+            }
+
             if (checkBox1.Checked)
             {
                 pictureBox1.Image = pics[index].Lod_src.Item1;
@@ -156,6 +165,11 @@ namespace TotalMinerPictureInjector
             {
                 pictureBox1.Image = pics[index].src.Item1;
             }
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
