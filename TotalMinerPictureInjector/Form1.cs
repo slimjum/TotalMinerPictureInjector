@@ -77,6 +77,12 @@ namespace TotalMinerPictureInjector
             {
                 var dialog = file.ShowDialog();
 
+                if (string.IsNullOrEmpty(file.FileName) || Path.GetFileName(file.FileName) != "photos.dat")
+                {
+                    MessageBox.Show($"{Path.GetFileName(file.FileName)} is not a valid file. Please select \"photos.dat\".", "Invalid File");
+                    return;
+                }
+
                 if (dialog == DialogResult.OK)
                     LoadPics(file.FileName);
 
