@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -14,6 +16,8 @@ namespace TotalMinerPictureInjector
     public partial class Form1 : Form
     {
         public List<TmPic> pics = new List<TmPic>();
+
+        public List<GlobalPic> GlobalPics = new List<GlobalPic>();
 
         public string Selected_File;
 
@@ -55,7 +59,7 @@ namespace TotalMinerPictureInjector
                 if (dialog == DialogResult.OK)
                 {
                     pics[index].Replace(ref pics[index].Hd, file.FileName);
-                    pics[index].Replace(ref pics[index].Lod, file.FileName);
+                    pics[index].Replace(ref pics[index].Sd, file.FileName);
                     pictureBox1.Image = pics[index].Hd;
                 }
             }
@@ -125,8 +129,8 @@ namespace TotalMinerPictureInjector
             if (index == -1)
                 return;
 
-            pictureBox1.Image = checkBox1.Checked ? pics[index].Lod : pics[index].Hd;
-            }
+            pictureBox1.Image = checkBox1.Checked ? pics[index].Sd : pics[index].Hd;
+        }
 
         private void Save_Click(object sender, EventArgs e)
         {
@@ -144,7 +148,7 @@ namespace TotalMinerPictureInjector
                     Writer.Write(Helper.ToColorDataAll(new Bitmap(pics[index].Hd, new Size(64, 64)), out int sroot1));
 
                     Writer.Write(16 * 16);
-                    Writer.Write(Helper.ToColorDataAll(new Bitmap(pics[index].Lod, new Size(16, 16)), out int sroot2));
+                    Writer.Write(Helper.ToColorDataAll(new Bitmap(pics[index].Sd, new Size(16, 16)), out int sroot2));
                 }
             }
 
@@ -161,27 +165,141 @@ namespace TotalMinerPictureInjector
                 return;
             }
 
-            pictureBox1.Image = checkBox1.Checked ? pics[index].Lod : pics[index].Hd;
+            pictureBox1.Image = checkBox1.Checked ? pics[index].Sd : pics[index].Hd;
         }
 
-        private void Add_picture_button_Click(object sender, EventArgs e)
-            {
-                pictureBox1.Image = pics[index].Lod.Item1;
-            }
-            else
-            {
-                pictureBox1.Image = pics[index].Hd.Item1;
-            }
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
+        private void button7_Click(object sender, EventArgs e)
         {
+            string mygames = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), @"My Games\TotalMinerDev\Photo\");
 
+            if (!Directory.Exists(mygames))
+                return;
+
+            var files = Directory.GetDirectories(mygames);
+            for (int index = 0; index < files.Length; index++)
+            {
+                var temp = new GlobalPic(files[index]);
+                if (!temp.IsValid)
+                    continue;
+
+                GlobalPics.Add(temp);
+                listBox2.Items.Add($"Index: {Path.GetFileName(files[index])}");
+            }
         }
 
-        private void Add_picture_button_Click(object sender, EventArgs e)
+        private void button8_Click(object sender, EventArgs e)
         {
+            foreach (var gp in GlobalPics)
+            {
+                if (!gp.Edited)
+                    continue;
 
+                gp.Save();
+            }
+            button10_Click(null, null);
+        }
+
+
+
+        private void listBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            var index = listBox2.SelectedIndex;
+
+            if (index == -1)
+                return;
+
+            pictureBox2.Image = GlobalPics[index].Org;
+        }
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            if (listBox2.Items.Count < 0 && GlobalPics.Count < 0)
+                return;
+
+            var index = listBox2.SelectedIndex;
+
+            if (index == -1) 
+                return;
+
+            using (FileDialog file = new OpenFileDialog() { Filter = "img file|*.png", })
+            {
+                var dialog = file.ShowDialog();
+
+                if (dialog == DialogResult.OK)
+                {
+                    GlobalPics[index].Replace(file.FileName);
+                    pictureBox2.Image = GlobalPics[index].Org;
+                }
+            }
+        }
+
+        private void button10_Click(object sender, EventArgs e)
+        {
+            GlobalPics.Clear();
+            listBox2.Items.Clear();
+            pictureBox2.Image = null;
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            using (ReplaceDialogMenu replaceMenu = new ReplaceDialogMenu())
+            {
+                var dialog = replaceMenu.ShowDialog();
+
+                if (dialog == DialogResult.OK)
+                {
+                    foreach (var pic in replaceMenu.Bitmaps)
+                    {
+                        var path = GetFreePhoto(out int index);
+                        Directory.CreateDirectory(path);
+
+                        var gp = new GlobalPic(path, true, index, pic);
+                        gp.Save();
+                        GlobalPics.Add(gp);
+                        listBox2.Items.Add($"Index: {index.ToString().PadLeft(6, '0')}");
+                    }
+                }
+            }
+        }
+
+        private string GetFreePhoto(out int Photoindex)
+        {
+            Photoindex = -1;
+            string mygames = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), @"My Games\TotalMinerDev\Photo\");
+
+            for (int index = 1; index < 255; index++)
+            {
+                var dir = Path.Combine(mygames, index.ToString().PadLeft(6, '0'));
+
+                if (Directory.Exists(dir))
+                    continue;
+
+                Photoindex = index;
+                return dir;
+            }
+
+            return string.Empty;
+        }
+
+        private void button11_Click(object sender, EventArgs e)
+        {
+            using (FileDialog file = new OpenFileDialog() { Filter = "img file|*.png", })
+            {
+                var dialog = file.ShowDialog();
+
+                if (dialog == DialogResult.OK)
+                {
+                    var path = GetFreePhoto(out int index);
+                    Directory.CreateDirectory(path);
+
+                    var gp = new GlobalPic(path, true, index, new Bitmap(Bitmap.FromFile(file.FileName)));
+                    GlobalPics.Add(gp);
+                    listBox2.Items.Add($"Index: {index.ToString().PadLeft(6, '0')}");
+
+                    GlobalPics.Last().Replace(file.FileName);
+                    pictureBox2.Image = GlobalPics.Last().Org;
+                }
+            }
         }
     }
 }
